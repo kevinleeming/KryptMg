@@ -2,9 +2,14 @@ import React, { useContext } from 'react';
 import { AiFillPlayCircle } from 'react-icons/ai';
 import { SiEthereum } from 'react-icons/si';
 import { BsInfoCircle } from 'react-icons/bs'
+import Facebook from '../../images/facebook.png';
+import Google from '../../images/google.png';
 
+import GoogleLogin from 'react-google-login';
 import { Loader } from './';
 import { TransactionContext } from '../context/TransactionContext';
+import { shortenAddress } from '../utils/shortenAddress';
+import { signInWithGoogle } from '../../Firebase';
 
 const companyCommonStyles = "min-h-[70px] sm:px-0 px-2 sm:min-w-[120px] flex justify-center items-center border-[0.5px] border-gray-400 text-sm font-light text-white";
 
@@ -39,30 +44,25 @@ const Welcome = () => {
                     <p className="text-left mt-5 text-white font-light md:w-9/12 w-11/12 text-base">
                         Explore the crypto world. Buy and sell cryptocurrencies easily on Krypto.
                     </p>
-                    {(!currentAccount) && (
+                    <hr className="block w-full mt-4 mb-4 border-0 border-t border-gray-600" />
+                    <div className="flex flex-wrap justify-center item-center">
+                        <div className="w-full mt-3 mb-3">
+                            <button
+                                className="flex w-full bg-blue-800/50 hover:bg-blue-900/50 text-white font-bold text-base py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline"
+                                type="button"
+                            >
+                                <img src={Facebook} alt="" className="w-5 mr-5" />
+                                Login with Facebook
+                            </button>
+                        </div>
                         <button
+                            className="flex w-full bg-red-700/50 hover:bg-red-800/50 text-white font-bold text-base py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline"
                             type="button"
-                            onClick={connectWallet}
-                            className="flex flex-row justify-center items-center my-5 bg-[#2952e3] p-3 rounded-full cursor-pointer hover:bg-[#2546bd]"
+                            onClick={signInWithGoogle}
                         >
-                            <p className="text-white text-base font-semibold">Connect Wallet</p>
+                            <img src={Google} alt="" className="w-5 mr-5" />
+                            Login with Google
                         </button>
-                    )}
-                    <div className="grid sm:grid-cols-3 grid-cols-2 w-full mt-10">
-                        <div className={`rounded-tl-2xl ${companyCommonStyles}`}>
-                            Reliability
-                        </div>
-                        <div className={companyCommonStyles}>Security</div>
-                        <div className={`sm:rounded-tr-2xl ${companyCommonStyles}`}>
-                            Ethereum
-                        </div>
-                        <div className={`sm:rounded-bl-2xl ${companyCommonStyles}`}>
-                            Web 3.0
-                        </div>
-                        <div className={companyCommonStyles}>Low Fees</div>
-                        <div className={`rounded-br-2xl ${companyCommonStyles}`}>
-                            Blockchain
-                        </div>
                     </div>
                 </div>
 
@@ -76,15 +76,25 @@ const Welcome = () => {
                                 <BsInfoCircle fontSize={17} color="#fff" />
                             </div>
                             <div>
-                                <p className="text-white font-light text-sm">
-                                    0xabcdefghijk
+                                <p className="text-white font-light text-lg">
+                                    {currentAccount ? shortenAddress(currentAccount) : "Address"}
                                 </p>
-                                <p className="text-white font-semibold text-lg mt-1">
+                                <p className="text-white font-semibold text-xl mt-1">
                                     Ethereum
                                 </p>
                             </div>
                         </div>
                     </div>
+
+                    {(!currentAccount) && (
+                        <button
+                            type="button"
+                            onClick={connectWallet}
+                            className="flex flex-row justify-center items-center my-5 bg-[#2952e3] p-3 rounded-full cursor-pointer hover:bg-[#2546bd]"
+                        >
+                            <p className="text-white text-base font-semibold">Connect Wallet</p>
+                        </button>
+                    )}
 
                     <div className="p-5 sm:w-96 w-full flex flex-col justify-start items-center blue-glassmorphism">
                         <Input placeholder="Address To" name="addressTo" type="text" handleChange={handleChange} />

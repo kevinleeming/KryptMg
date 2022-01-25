@@ -1,16 +1,14 @@
-import { Navbar, Welcome, Footer, Services, Transactions } from "./components"
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import Social from './container/Social';
+import Exchange from './container/Exchange';
 
 const App = () => {
   return (
-    <div className="min-h-screen">
-      <div className="gradient-bg-welcome">
-        <Navbar />
-        <Welcome />
-      </div>
-      <Services />
-      <Transactions />
-      <Footer />
-    </div>
+    <Routes>
+      <Route path="/" element={<Exchange />} />
+      <Route path="/*" element={<Social />} /> {/* others path */}
+    </Routes>
+    
   )
 }
 

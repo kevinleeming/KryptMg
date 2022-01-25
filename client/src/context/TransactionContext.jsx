@@ -7,6 +7,10 @@ export const TransactionContext = React.createContext();
 
 const { ethereum } = window;
 
+// // Declare IPFS
+// const ipfsClient = require('ipfs-http-client')
+// const ipfs = ipfsClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' }) // leaving out the arguments will default to these values
+
 const getEthereumContract = () => {
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
@@ -17,12 +21,17 @@ const getEthereumContract = () => {
 export const TransactionProvider = ({ children }) => {
     const [currentAccount, setCurrentAccount] = useState("");
     const [formData, setFormData] = useState({ addressTo: "", amount: "", keyword: "", message: ""});
+    const [postData, setPostData] = useState({title:"", about:"", category:""});
     const [isLoading, setIsLoading] = useState(false);
     const [transactionCount, setTransactionCount] = useState(localStorage.getItem('transactionCount'));
 
     const handleChange = (e, name) => {
         setFormData((prevState) => ({ ...prevState, [name]: e.target.value }));
     };
+
+    const handlePostChange = (e, name) => {
+        setPostData((prevState) => ({ ...prevState, [name]: e.target.value }));
+    }
 
     const checkIfWalletIsConnected = async () => {
         try {
@@ -86,12 +95,18 @@ export const TransactionProvider = ({ children }) => {
         }
     }
 
+    // Uploading posts
+    const uploadPost = async () => {
+        const { title, about, category } = postData;
+
+    }
+
     useEffect(() => {
         checkIfWalletIsConnected();
     }, []);
 
     return (
-        <TransactionContext.Provider value={{ connectWallet, currentAccount, formData, sendTransaction, handleChange }}>
+        <TransactionContext.Provider value={{ connectWallet, currentAccount, formData, sendTransaction, handleChange, postData, handlePostChange, uploadPost }}>
             {children}
         </TransactionContext.Provider>
     )
