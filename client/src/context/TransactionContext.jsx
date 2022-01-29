@@ -7,9 +7,11 @@ export const TransactionContext = React.createContext();
 
 const { ethereum } = window;
 
-// // Declare IPFS
-// const ipfsClient = require('ipfs-http-client')
-// const ipfs = ipfsClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' }) // leaving out the arguments will default to these values
+// Declare IPFS
+// const ipfsClient = require('ipfs-http-client');
+// const ipfs = ipfsClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' }); // leaving out the arguments will default to these values
+import { create } from 'ipfs-http-client';
+const client = create('https://ipfs.infura.io:5001/api/v0');
 
 const getEthereumContract = () => {
     const provider = new ethers.providers.Web3Provider(ethereum);
@@ -24,6 +26,7 @@ export const TransactionProvider = ({ children }) => {
     const [postData, setPostData] = useState({title:"", about:"", category:""});
     const [isLoading, setIsLoading] = useState(false);
     const [transactionCount, setTransactionCount] = useState(localStorage.getItem('transactionCount'));
+    const [createPinLoading, setCreatePinLoading] = useState(false);
 
     const handleChange = (e, name) => {
         setFormData((prevState) => ({ ...prevState, [name]: e.target.value }));
@@ -95,10 +98,30 @@ export const TransactionProvider = ({ children }) => {
         }
     }
 
-    // Uploading posts
-    const uploadPost = async () => {
+    // Uploading posts : 1. upload on ipfs 2. add metadata on blockchain
+    const uploadPost = async (isImage, file) => {
         const { title, about, category } = postData;
+        try {
+            const addedFile = await client.add(file);
+            const url = `https://ipfs.infura.io/ipfs/${addedFile.path}`;
+            console.log(`Uploading to ipfs at ${url}`);
+            // const addedFile = await ipfs.add(file, {
+            //     progress: (prog) => console.log(`received: ${prog}`),
+            // });
+            // console.log(addedFile);
 
+            const transactionContract = getEthereumContract();
+            const NewPost = await transactionContract.createPost(url, title, about, category, isImage);
+            setCreatePinLoading(true);
+            console.log("Loading...");
+            await NewPost.wait();
+            setCreatePinLoading(false);
+            console.log("Add post to blockchain successfully!");
+
+        } catch(error) {
+            console.log(error);
+            throw new Error("Cannot upload content.", error);
+        }
     }
 
     useEffect(() => {
@@ -106,7 +129,7 @@ export const TransactionProvider = ({ children }) => {
     }, []);
 
     return (
-        <TransactionContext.Provider value={{ connectWallet, currentAccount, formData, sendTransaction, handleChange, postData, handlePostChange, uploadPost }}>
+        <TransactionContext.Provider value={{ connectWallet, currentAccount, isLoading, formData, sendTransaction, handleChange, uploadPost, postData, handlePostChange, createPinLoading }}>
             {children}
         </TransactionContext.Provider>
     )

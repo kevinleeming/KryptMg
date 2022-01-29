@@ -18,27 +18,28 @@ const Input = ({ placeholder, name, type, value, handleChange, isTitle }) => (
 );
 
 const CreatePin = ({ user }) => {
-    const { connectWallet, currentAccount, postData, handlePostChange, uploadPost } = useContext(TransactionContext);
+    const { connectWallet, currentAccount, postData, handlePostChange, uploadPost, createPinLoading } = useContext(TransactionContext);
 
-    const [loading, setLoading] = useState(false);
     const [fields, setFields] = useState(false);
     const [imageAsset, setImageAsset] = useState(null);
     const [wrongImageType, setWrongImageType] = useState(false);
-    //const [isImage, setIsImage] = useState(); // need to be implemented in 'TransactionContext.jsx'
+    const [isImage, setIsImage] = useState(); // need to be implemented in 'TransactionContext.jsx'
+    const [file, setFile] = useState();
 
     const navigate = useNavigate();
 
     const captureFile = (e) => {
         const selectedFile = e.target.files[0];
         const fileName = selectedFile.name;
-        const reader = new FileReader();
+        //const reader = new FileReader();
 
         // Check file name to determine whether is img or video file
-        // var imgExt = new Array(".jpg", ".jpeg", ".png", ".bmp", ".gif")
-        // var fileExt = fileName.substring(fileName.lastIndexOf('.'))
-        // if(imgExt.indexOf(fileExt) < 0) setIsImage(false);
-        // else setIsImage(true);
+        var imgExt = new Array(".jpg", ".jpeg", ".png", ".bmp", ".gif")
+        var fileExt = fileName.substring(fileName.lastIndexOf('.'))
+        if(imgExt.indexOf(fileExt) < 0) setIsImage(false);
+        else setIsImage(true);
 
+        setFile(selectedFile);
         setImageAsset(URL.createObjectURL(selectedFile));
     }
 
@@ -46,7 +47,7 @@ const CreatePin = ({ user }) => {
         const { title, about, category } = postData;
         e.preventDefault();
         if(!title || !about || !category) return;
-        uploadPost();
+        uploadPost(isImage, file);
     }
 
     return (
@@ -57,7 +58,7 @@ const CreatePin = ({ user }) => {
             <div className=" flex lg:flex-row flex-col justify-center items-center bg-white lg:p-5 p-3 lg:w-4/5  w-full">
                 <div className="bg-secondaryColor p-3 flex flex-0.7 w-full">
                     <div className=" flex justify-center items-center flex-col border-2 border-dotted border-gray-300 p-3 w-full h-420">
-                        {loading && <Spinner />}
+                        {createPinLoading && <Spinner />}
                         {wrongImageType && <p>It&apos;s wrong file type.</p>}
                         {!imageAsset ? (
                             <label>
