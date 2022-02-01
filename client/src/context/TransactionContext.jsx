@@ -28,6 +28,9 @@ export const TransactionProvider = ({ children }) => {
     const [transactionCount, setTransactionCount] = useState(localStorage.getItem('transactionCount'));
     const [createPinLoading, setCreatePinLoading] = useState(false);
 
+    const [allPost, setAllPost] = useState([]);
+    const [postExist, setPostExist] = useState(false);
+
     const handleChange = (e, name) => {
         setFormData((prevState) => ({ ...prevState, [name]: e.target.value }));
     };
@@ -102,6 +105,8 @@ export const TransactionProvider = ({ children }) => {
     const uploadPost = async (isImage, file) => {
         const { title, about, category } = postData;
         try {
+            if (!ethereum) return alert("Please install MetaMask.");
+
             const addedFile = await client.add(file);
             const url = `https://ipfs.infura.io/ipfs/${addedFile.path}`;
             console.log(`Uploading to ipfs at ${url}`);
@@ -124,12 +129,47 @@ export const TransactionProvider = ({ children }) => {
         }
     }
 
+    const fetchPost = async (categoryName) => {
+        try {
+            while(allPost.length > 0) allPost.pop();
+            setAllPost(allPost);
+            console.log("reset", allPost);
+            setPostExist(false);
+            const transactionContract = getEthereumContract();
+            const postCount = await transactionContract.postCount();
+            for(var i = 1; i <= postCount; i++){
+                const p = await transactionContract.post(i);
+                if(categoryName == 'all'){
+                    allPost.push(p);
+                    setAllPost(allPost);
+                    setPostExist(true);
+                    console.log('all ', allPost);
+                }
+                else {
+                    if(categoryName == p.category) { 
+                        allPost.push(p);
+                        setAllPost(allPost);
+                        setPostExist(true);
+                        console.log(categoryName, allPost);
+                    }
+                }
+            }
+            
+        } catch(error) {
+            console.log(error);
+            throw new Error("Fetching post error.");
+        }
+    }
+
     useEffect(() => {
         checkIfWalletIsConnected();
     }, []);
 
     return (
-        <TransactionContext.Provider value={{ connectWallet, currentAccount, isLoading, formData, sendTransaction, handleChange, uploadPost, postData, handlePostChange, createPinLoading }}>
+        <TransactionContext.Provider value={{ connectWallet, currentAccount, isLoading, formData, sendTransaction, handleChange,
+         uploadPost, postData, handlePostChange, createPinLoading, // Upload post for './CreatePin.jsx'
+         allPost, fetchPost, postExist // Fetch post for './Feed.jsx'
+         }}>
             {children}
         </TransactionContext.Provider>
     )
