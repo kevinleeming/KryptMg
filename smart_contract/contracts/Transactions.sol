@@ -6,11 +6,13 @@ contract Transactions {
     uint256 transactionCounter;
     uint public postCount = 0;
     mapping(uint => Post) public post;
+    uint256 public tipsCount = 0;
+    TipsTransaction[] public tipTx;
 
     struct TransferStruct {
         address sender;
         address receiver;
-        uint amount;
+        uint amount; // (Wei)
         string message;
         uint256 timestamp;
         string keyword;
@@ -23,12 +25,24 @@ contract Transactions {
         string title;
         string description;
         string category;
-        uint tipAmount;
+        uint tipAmount; // (Wei)
         address payable author;
+        string authorGmailName;
+        string authorEmail;
+        string authorPic;
+    }
+
+    struct TipsTransaction {
+        address tipper;
+        address author;
+        uint amount; // (Wei)
+        uint postId;
+        uint256 timestamp;
     }
 
     event Transfer(address from, address receiver, uint amount, string message, uint256 timestamp, string keyword);
-    event PostCreated(bool isImage, uint id, string hash, string title, string description, string category, uint tipAmount, address payable author);
+    event PostCreated(bool isImage, uint id, string hash, string title, string description, string category, uint tipAmount, address payable author, string authorGmailName, string authorEmail, string authorPic);
+    event Tips(address tipper, address author, uint amount, uint postId, uint256 timestamp);
 
     TransferStruct[] transactions;
 
@@ -49,24 +63,27 @@ contract Transactions {
     }
 
     // Create posts
-    function createPost(string memory _postHash, string memory _title, string memory _description, string memory _category, bool isImage) public {
+    function createPost(string memory _postHash, string memory _title, string memory _description, string memory _category, bool isImage, string memory _authorGmailName, string memory _authorEmail, string memory _authorPic) public {
         require(bytes(_postHash).length > 0);
         require(bytes(_description).length > 0);
         require(msg.sender != address(0x0));
 
         postCount++;
-        post[postCount] = Post(isImage, postCount, _postHash, _title, _description, _category, 0, payable(msg.sender));
-        emit PostCreated(isImage, postCount, _postHash, _title, _description, _category, 0, payable(msg.sender));
+        post[postCount] = Post(isImage, postCount, _postHash, _title, _description, _category, 0, payable(msg.sender), _authorGmailName, _authorEmail, _authorPic);
+        emit PostCreated(isImage, postCount, _postHash, _title, _description, _category, 0, payable(msg.sender), _authorGmailName, _authorEmail, _authorPic);
     }
 
-    // Tip posts
-    // function tipPostOwner(uint _id) public payable {
-    //     require(_id > 0 && _id <= postCount);
-        
-    //     Post memory _post = post[_id]; // Fetch post
-    //     address payable _author = _post.author; // Fetch author
-    //     payable(address(_author)).transfer(msg.value); // Pay the author by sending them Ether
-        
+    // Tip posts record
+    function tipPostRecord(address payable author, uint amount, uint postId) public {
+        require(postId > 0 && postId <= postCount);
 
-    // }
+        tipsCount++;
+        Post memory _post = post[postId]; // Fetch post
+        _post.tipAmount = _post.tipAmount + amount; // Increment this post tipAmount (Wei)
+        post[postId] = _post;
+
+        tipTx.push(TipsTransaction(msg.sender, author, amount, postId, block.timestamp));
+
+        emit Tips(msg.sender, author, amount, postId, block.timestamp);
+    }
 }

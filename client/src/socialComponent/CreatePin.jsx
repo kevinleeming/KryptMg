@@ -47,7 +47,7 @@ const CreatePin = ({ user }) => {
         const { title, about, category } = postData;
         e.preventDefault();
         if(!title || !about || !category) return;
-        uploadPost(isImage, file);
+        uploadPost(isImage, file, user);
     }
 
     return (

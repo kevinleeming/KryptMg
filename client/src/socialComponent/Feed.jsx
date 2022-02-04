@@ -11,15 +11,19 @@ const Feed = ({ user }) => {
     const [loading, setLoading] = useState(false);
     const { categoryName } = useParams();
 
+    const fetch = async (categoryName) => {
+        await fetchPost(categoryName);
+        setLoading(false);
+    }
+
     useEffect(() => {
         setLoading(true);
         if(categoryName){
-            fetchPost(categoryName);
+            fetch(categoryName);
         }
         else{
-            fetchPost('all');
+            fetch('all');
         }
-        setLoading(false);
     }, [categoryName])
 
     const ideaName = categoryName || 'new';

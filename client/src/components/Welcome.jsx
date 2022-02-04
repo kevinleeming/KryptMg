@@ -46,15 +46,6 @@ const Welcome = () => {
                     </p>
                     <hr className="block w-full mt-4 mb-4 border-0 border-t border-gray-600" />
                     <div className="flex flex-wrap justify-center item-center">
-                        <div className="w-full mt-3 mb-3">
-                            <button
-                                className="flex w-full bg-blue-800/50 hover:bg-blue-900/50 text-white font-bold text-base py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline"
-                                type="button"
-                            >
-                                <img src={Facebook} alt="" className="w-5 mr-5" />
-                                Login with Facebook
-                            </button>
-                        </div>
                         <button
                             className="flex w-full bg-red-700/50 hover:bg-red-800/50 text-white font-bold text-base py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline"
                             type="button"

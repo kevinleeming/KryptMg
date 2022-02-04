@@ -27,6 +27,7 @@ export const TransactionProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [transactionCount, setTransactionCount] = useState(localStorage.getItem('transactionCount'));
     const [createPinLoading, setCreatePinLoading] = useState(false);
+    const [pinDetailLoading, setPinDetailLoading] = useState(false);
 
     const [allPost, setAllPost] = useState([]);
     const [postExist, setPostExist] = useState(false);
@@ -73,7 +74,7 @@ export const TransactionProvider = ({ children }) => {
             // get the data from the Form.
             const { addressTo, amount, keyword, message } = formData;
             const transactionContract = getEthereumContract();
-            const parseAmount = ethers.utils.parseEther(amount);
+            const parseAmount = ethers.utils.parseEther(amount); // etherString to BigNumber (Wei) 
 
             await ethereum.request({
                 method: 'eth_sendTransaction',
@@ -81,7 +82,7 @@ export const TransactionProvider = ({ children }) => {
                     from: currentAccount,
                     to: addressTo,
                     gas: '0x5208', // 21000 GWEI = 0.000021 Ether
-                    value: parseAmount._hex, // transform amount(dec) into hex 
+                    value: parseAmount._hex, // transform amount(dec) into hex , (value store Wei)
                 }]
             });
 
@@ -102,8 +103,9 @@ export const TransactionProvider = ({ children }) => {
     }
 
     // Uploading posts : 1. upload on ipfs 2. add metadata on blockchain
-    const uploadPost = async (isImage, file) => {
+    const uploadPost = async (isImage, file, user) => {
         const { title, about, category } = postData;
+        const { name, email, profilePic } = user;
         try {
             if (!ethereum) return alert("Please install MetaMask.");
 
@@ -116,7 +118,7 @@ export const TransactionProvider = ({ children }) => {
             // console.log(addedFile);
 
             const transactionContract = getEthereumContract();
-            const NewPost = await transactionContract.createPost(url, title, about, category, isImage);
+            const NewPost = await transactionContract.createPost(url, title, about, category, isImage, name, email, profilePic);
             setCreatePinLoading(true);
             console.log("Loading...");
             await NewPost.wait();
@@ -129,6 +131,7 @@ export const TransactionProvider = ({ children }) => {
         }
     }
 
+    // Fetching all the posts from blockchain depends on different category.
     const fetchPost = async (categoryName) => {
         try {
             while(allPost.length > 0) allPost.pop();
@@ -154,10 +157,56 @@ export const TransactionProvider = ({ children }) => {
                     }
                 }
             }
-            
         } catch(error) {
             console.log(error);
             throw new Error("Fetching post error.");
+        }
+    }
+
+    // Fetching specific post information
+    const fetchOnePost = async (postId) => {
+        try {
+            const transactionContract = getEthereumContract();
+            const post = await transactionContract.post(postId);
+            return post;
+        } catch(error) {
+            console.log(error);
+            throw new Error(`Fetching ${postId} post error.`);
+        }
+    }
+
+    // Tips author
+    const tipsAuthor = async (eth, author, postId) => {
+        try {
+            if(!ethereum) return alert("Please install Metamask.");
+
+            const transactionContract = getEthereumContract();
+            const parseAmount = ethers.utils.parseEther(eth);
+
+            await ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [{
+                    from: currentAccount,
+                    to: author,
+                    gas: '0x5208', // 21000 GWEI = 0.000021 Ether
+                    value: parseAmount._hex, // transform amount(dec) into hex 
+                }]
+            })
+
+            const amountEth = ethers.utils.formatEther(parseAmount);
+            console.log(amountEth);
+
+            const tipTransaction = await transactionContract.tipPostRecord(author, parseAmount, postId);
+
+            setPinDetailLoading(true);
+            console.log(`Tipping ${amountEth} Ethers to author ${author}...`);
+            await tipTransaction.wait();
+            setPinDetailLoading(false);
+            console.log("Successfully tipped.");
+
+        } catch(error) {
+            console.log(error);
+            throw new Error("Tips Ether Error!");
         }
     }
 
@@ -168,7 +217,8 @@ export const TransactionProvider = ({ children }) => {
     return (
         <TransactionContext.Provider value={{ connectWallet, currentAccount, isLoading, formData, sendTransaction, handleChange,
          uploadPost, postData, handlePostChange, createPinLoading, // Upload post for './CreatePin.jsx'
-         allPost, fetchPost, postExist // Fetch post for './Feed.jsx'
+         allPost, fetchPost, postExist, // Fetch post for './Feed.jsx'
+         fetchOnePost, pinDetailLoading, tipsAuthor // Fetch specific post, tip author funct. for './PinDetail.jsx'
          }}>
             {children}
         </TransactionContext.Provider>

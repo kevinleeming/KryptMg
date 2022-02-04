@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
+import { ethers } from 'ethers';
 import { MdDownloadForOffline } from 'react-icons/md';
 import { AiTwotoneDelete } from 'react-icons/ai';
 import { BsFillArrowUpRightCircleFill } from 'react-icons/bs';
 import { SiEthereum } from 'react-icons/si';
+import { FiThumbsUp } from "react-icons/fi";
 
 import { shortenAddress } from '../utils/shortenAddress';
 
-const Pin = ({ pin: { hash, id, author }, user }) => {
+const Pin = ({ pin: { hash, id, author, category, tipAmount, authorGmailName, authorPic }, user }) => {
     const [postHovered, setPostHovered] = useState(false);
     const [savingPost, setSavingPost] = useState(false);
     const navigate = useNavigate();
@@ -36,6 +37,14 @@ const Pin = ({ pin: { hash, id, author }, user }) => {
                                 </a>
                             </div>
                         </div>
+                        <div className="absolute top-0 right-0 flex p-2">
+                            <div className="flex flex-row">
+                                <FiThumbsUp className="w-7 h-7 bg-white opacity-80 rounded-lg" />
+                                <div className="flex bg-white items-center ml-1 rounded-lg opacity-50">
+                                    <p className="p-1 text-dark text-base font-bold">{ethers.utils.formatEther(tipAmount)} ethers</p>
+                                </div>
+                            </div>
+                        </div>
                         <div className=" flex justify-between items-center gap-2 w-full">
                             {hash && (
                                 <a
@@ -52,13 +61,14 @@ const Pin = ({ pin: { hash, id, author }, user }) => {
                     </div>
                 )}
             </div>
-            <Link to={`/user-profile/${user.name}`} className="flex gap-2 mt-2 items-center justify-center">
+            <h4 className="flex text-zinc-500 font-semibold text-lg text-gray-800 item-center justify-center">{category}</h4>
+            <Link to={`/user-profile/${authorGmailName}`} className="flex gap-2 mt-1 items-center justify-center">
                 <img
-                    src={user.profilePic}
+                    src={authorPic}
                     alt="user-profile"
-                    className="w-8 h-8 rounded-full object-cover"
+                    className="w-7 h-7 rounded-full object-cover"
                 />
-                <p className="font-semibold capitalize">{user.name}</p>
+                <p className="font-semibold capitalize">{authorGmailName}</p>
             </Link>
             <div className="flex justify-center">
                 <SiEthereum fontSize={20} color="#000" />
