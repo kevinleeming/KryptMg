@@ -1,15 +1,21 @@
-import React from 'react'
+import React, { useEffect, useState, useContext } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { RiHomeFill } from 'react-icons/ri';
 import { IoIosArrowForward } from 'react-icons/io';
+import { SiEthereum } from 'react-icons/si';
 
 import photo from '../../images/photo.png';
 import { categories } from '../utils/socialData';
+import { shortenAddress } from '../utils/shortenAddress';
+import { TransactionContext } from '../context/TransactionContext';
 
 const isNotActiveStyle = 'flex items-center py-2 px-5 gap-3 text-gray-500 hover:text-black hover:scale-105 hover:-translate-y-1 transition-all duration-200 ease-in-out capitalize';
 const isActiveStyle = 'flex items-center py-2 px-5 gap-3 font-extrabold border-r-2 border-black hover:scale-105 hover:-translate-y-1 transition-all duration-200 ease-in-out capitalize';
 
 export const Sidebar = ({ user, closeToggle }) => {
+    const { currentAccount } = useContext(TransactionContext);
+    const [account, setAccount] = useState("");
+
     const handleCloseSidebar = () => {
         // In 'Home.jsx' we call <Sidebar/> twice but with different param (check whether closeToggle exist).
         if(closeToggle) closeToggle(false);
@@ -43,6 +49,7 @@ export const Sidebar = ({ user, closeToggle }) => {
                             onClick={handleCloseSidebar}
                             key={category.name}
                         >
+                            <img src={category.image} className="w-8 h-8 rounded-full shadow-sm" />
                             {category.name}
                         </NavLink>
                     ))}
@@ -50,13 +57,22 @@ export const Sidebar = ({ user, closeToggle }) => {
             </div>
             {user && (
                 <Link
-                    to={`/user-profile/${user.name}`}
+                    to={`/user-profile/${currentAccount}`}
                     className="flex my-5 mb-3 gap-2 p-2 items-center bg-white rounded-lg shadow-lg mx-3"
                     onClick={handleCloseSidebar}
                 >
-                    <img src={user.profilePic} className="w-10 h-10 rounded-full" alt="user-profile" />
-                    {user.name}
-                    <IoIosArrowForward />
+                    <div className="flex flex-col">
+                        <div className="flex items-center justify-center">
+                            <img src={user.profilePic} className="w-10 h-10 rounded-full" alt="user-profile" />
+                            <div className="ml-1">{user.name}</div>
+                            <div className="ml-1"><IoIosArrowForward /></div>
+                        </div>
+                        <div className="flex justify-center mt-2">
+                            <SiEthereum fontSize={20} color="#000" />
+                            {shortenAddress(currentAccount)}
+                        </div>
+                    </div>
+                    
                 </Link>
             )}
         </div>

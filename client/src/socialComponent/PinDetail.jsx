@@ -71,8 +71,11 @@ const PinDetail = ({ user }) => {
                         </a>
                     </div>
                     <p className="text-base font-bold">IPFS Address:</p>
-                    <a href={pinDetail.hash} target="_blank" rel="noreferrer" className="bg-stone-300 flex items-center gap-2 text-black font-bold p-2 pl-4 pr-4 rounded-full opacity-70 hover:opacity-100 hover:shadow-md">
-                        {pinDetail.hash.slice(8, 70)}
+                    <a href={pinDetail.hash} target="_blank" rel="noreferrer" className="sm:hidden bg-stone-300 flex items-center gap-2 text-black font-bold p-2 pl-4 pr-4 rounded-full opacity-70 hover:opacity-100 hover:shadow-md">
+                        {pinDetail.hash.slice(8, 40)}...
+                    </a>
+                    <a href={pinDetail.hash} target="_blank" rel="noreferrer" className="hidden sm:flex bg-stone-300 items-center gap-2 text-black font-bold p-2 pl-4 pr-4 rounded-full opacity-70 hover:opacity-100 hover:shadow-md">
+                        {pinDetail.hash.slice(8, 60)}...
                     </a>
                 </div>
                 <div>
@@ -83,7 +86,7 @@ const PinDetail = ({ user }) => {
                         <p className="mt-3">{pinDetail.description}</p>
                     </div>
                 </div>
-                <Link to={`/user-profile/${pinDetail.authorGmailName}`} className="flex gap-2 mt-2 items-center">
+                <div className="flex gap-2 mt-2 items-center">
                     <p className="font-semibold capitalize">Author:</p>
                     <img
                         src={pinDetail.authorPic}
@@ -91,12 +94,14 @@ const PinDetail = ({ user }) => {
                         className="w-8 h-8 rounded-full object-cover"
                     />
                     <p className="font-semibold capitalize">{pinDetail.authorGmailName}</p>
-                </Link>
-                <div className="flex justify-start mt-2">
-                    <p className="font-semibold capitalize">Address:</p>
-                    <SiEthereum fontSize={20} color="#000" />
-                    {shortenAddress(pinDetail.author)}
                 </div>
+                <Link to={`/user-profile/${pinDetail.author}`} >
+                    <div className="flex justify-start mt-2">
+                        <p className="font-semibold capitalize">Address:</p>
+                        <SiEthereum fontSize={20} color="#000" />
+                        {shortenAddress(pinDetail.author)}
+                    </div>
+                </Link>
                 
                 <h2 className="mt-10 text-xl font-bold">Tips Author</h2>
                 <input 

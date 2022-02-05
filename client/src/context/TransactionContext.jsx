@@ -31,6 +31,7 @@ export const TransactionProvider = ({ children }) => {
 
     const [allPost, setAllPost] = useState([]);
     const [postExist, setPostExist] = useState(false);
+    //const [profilePost, setProfilePost] = useState([]);
 
     const handleChange = (e, name) => {
         setFormData((prevState) => ({ ...prevState, [name]: e.target.value }));
@@ -136,7 +137,6 @@ export const TransactionProvider = ({ children }) => {
         try {
             while(allPost.length > 0) allPost.pop();
             setAllPost(allPost);
-            console.log("reset", allPost);
             setPostExist(false);
             const transactionContract = getEthereumContract();
             const postCount = await transactionContract.postCount();
@@ -146,14 +146,12 @@ export const TransactionProvider = ({ children }) => {
                     allPost.push(p);
                     setAllPost(allPost);
                     setPostExist(true);
-                    console.log('all ', allPost);
                 }
                 else {
                     if(categoryName == p.category) { 
                         allPost.push(p);
                         setAllPost(allPost);
                         setPostExist(true);
-                        console.log(categoryName, allPost);
                     }
                 }
             }
@@ -210,6 +208,27 @@ export const TransactionProvider = ({ children }) => {
         }
     }
 
+    const fetchAuthorPosts = async (userAddress) => {
+        try {
+            let profilePost = [];
+            // while(profilePost.length > 0) profilePost.pop();
+            // setAllPost(profilePost)
+            const transactionContract = getEthereumContract();
+            const postCount = await transactionContract.postCount();
+            for(var i = 1; i <= postCount; i++){
+                const post = await transactionContract.post(i);
+                if(post.author.toLowerCase() == userAddress){
+                    profilePost.push(post);
+                    //setProfilePost(profilePost);
+                }
+            }
+            return profilePost;
+        } catch(error) {
+            console.log(error);
+            throw new Error("Fetching Profile Error!");
+        }
+    }
+
     useEffect(() => {
         checkIfWalletIsConnected();
     }, []);
@@ -218,7 +237,8 @@ export const TransactionProvider = ({ children }) => {
         <TransactionContext.Provider value={{ connectWallet, currentAccount, isLoading, formData, sendTransaction, handleChange,
          uploadPost, postData, handlePostChange, createPinLoading, // Upload post for './CreatePin.jsx'
          allPost, fetchPost, postExist, // Fetch post for './Feed.jsx'
-         fetchOnePost, pinDetailLoading, tipsAuthor // Fetch specific post, tip author funct. for './PinDetail.jsx'
+         fetchOnePost, pinDetailLoading, tipsAuthor, // Fetch specific post, tip author funct. for './PinDetail.jsx'
+         fetchAuthorPosts // for './UserProfile.jsx'
          }}>
             {children}
         </TransactionContext.Provider>

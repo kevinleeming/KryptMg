@@ -54,7 +54,7 @@ const Pin = ({ pin: { hash, id, author, category, tipAmount, authorGmailName, au
                                     className="bg-white flex items-center gap-2 text-black font-bold p-2 pl-4 pr-4 rounded-full opacity-70 hover:opacity-100 hover:shadow-md"
                                 >
                                     <BsFillArrowUpRightCircleFill />
-                                    {hash.length > 20 ? hash.slice(8, 30) : hash.slice(8)}
+                                    {hash.slice(8, 30)}...
                                 </a>
                             )}
                         </div>
@@ -62,18 +62,20 @@ const Pin = ({ pin: { hash, id, author, category, tipAmount, authorGmailName, au
                 )}
             </div>
             <h4 className="flex text-zinc-500 font-semibold text-lg text-gray-800 item-center justify-center">{category}</h4>
-            <Link to={`/user-profile/${authorGmailName}`} className="flex gap-2 mt-1 items-center justify-center">
-                <img
-                    src={authorPic}
-                    alt="user-profile"
-                    className="w-7 h-7 rounded-full object-cover"
-                />
-                <p className="font-semibold capitalize">{authorGmailName}</p>
+            <Link to={`/user-profile/${author}`} className="flex flex-col gap-2 mt-1 items-center justify-center">
+                <div className="flex">
+                    <img
+                        src={authorPic}
+                        alt="user-profile"
+                        className="w-7 h-7 rounded-full object-cover"
+                    />
+                    <p className="font-semibold ml-1 capitalize">{authorGmailName}</p>
+                </div>
+                <div className="flex justify-center">
+                    <SiEthereum fontSize={20} color="#000" />
+                    {shortenAddress(author)}
+                </div>
             </Link>
-            <div className="flex justify-center">
-                <SiEthereum fontSize={20} color="#000" />
-                {shortenAddress(author)}
-            </div>
         </div>
     )
 };
