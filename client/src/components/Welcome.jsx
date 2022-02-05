@@ -1,8 +1,7 @@
 import React, { useContext } from 'react';
 import { AiFillPlayCircle } from 'react-icons/ai';
 import { SiEthereum } from 'react-icons/si';
-import { BsInfoCircle } from 'react-icons/bs'
-import Facebook from '../../images/facebook.png';
+import { BsInfoCircle } from 'react-icons/bs';
 import Google from '../../images/google.png';
 
 import GoogleLogin from 'react-google-login';

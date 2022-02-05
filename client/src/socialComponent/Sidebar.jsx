@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { RiHomeFill } from 'react-icons/ri';
 import { IoIosArrowForward } from 'react-icons/io';
 import { SiEthereum } from 'react-icons/si';
+import Google from '../../images/google.png';
 
 import photo from '../../images/photo.png';
 import { categories } from '../utils/socialData';
@@ -14,7 +15,14 @@ const isActiveStyle = 'flex items-center py-2 px-5 gap-3 font-extrabold border-r
 
 export const Sidebar = ({ user, closeToggle }) => {
     const { currentAccount } = useContext(TransactionContext);
-    const [account, setAccount] = useState("");
+    const navigate = useNavigate();
+
+    const Logout = () => {
+        localStorage.setItem("name", "");
+        localStorage.setItem("email", "");
+        localStorage.setItem("profilePic", "");
+        navigate('./');
+    }
 
     const handleCloseSidebar = () => {
         // In 'Home.jsx' we call <Sidebar/> twice but with different param (check whether closeToggle exist).
@@ -74,6 +82,18 @@ export const Sidebar = ({ user, closeToggle }) => {
                     </div>
                     
                 </Link>
+            )}
+            {user && (
+                <div className="flex item-center justify-center mb-5">
+                    <button
+                        className="flex bg-red-700/80 hover:bg-red-800/80 text-white font-bold text-base py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline"
+                        type="button"
+                        onClick={Logout}
+                    >
+                        <img src={Google} alt="" className="w-5 mr-5" />
+                        Logout
+                    </button>
+                </div>
             )}
         </div>
     )
