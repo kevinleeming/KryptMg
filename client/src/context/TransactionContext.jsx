@@ -47,10 +47,11 @@ export const TransactionProvider = ({ children }) => {
             const accounts = await ethereum.request({ method: "eth_accounts" });
             if (accounts.length) {
               setCurrentAccount(accounts[0]);
-              //getAllTransactions();
+              return accounts[0];
             } 
             else {
               console.log("No accounts found");
+              return "";
             }
         } catch (error) {
             console.log(error);
@@ -229,8 +230,54 @@ export const TransactionProvider = ({ children }) => {
         }
     }
 
+    const UserCheck = async (account) => {
+        const transactionContract = getEthereumContract();
+        
+        const userExist = await transactionContract.isExistUser(account);
+        if(userExist){
+            console.log(`${account} exist in Block.`);
+        }
+        else{
+            console.log(`${account} yet exist in Block.`);
+            const addUserToBlock = await transactionContract.AddUser(account);
+            console.log("Add user to blockchain...");
+            await addUserToBlock.wait();
+            console.log("Successfully added.");
+        }
+    }
+
+    const fetchUserInfo = async (account) => {
+        const info = {
+            followers: [],
+            subscribes: [],
+        }
+        const transactionContract = getEthereumContract();
+        const userExist = await transactionContract.isExistUser(account);
+        if(userExist){
+            console.log(`${account} exist in Block.`);
+            info.followers = await transactionContract.getFollowers(account);
+            info.subscribes = await transactionContract.getSubscribes(account);
+        }
+        else console.log(`${account} yet exist in Block.`);
+        return info;
+    }
+
+    const subscribeUser = async (author, subscriber) => {
+        try {
+            const transactionContract = getEthereumContract();
+            const subscribeEvent = await transactionContract.Subscribe(author, subscriber);
+            console.log("Loading...");
+            await subscribeEvent.wait();
+            console.log("Success.");
+        } catch(error) {
+            console.log(error);
+            throw new Error("Subscribe Error!");
+        }
+    }
+
     useEffect(() => {
-        checkIfWalletIsConnected();
+        const acc = checkIfWalletIsConnected();
+        UserCheck(acc);
     }, []);
 
     return (
@@ -238,7 +285,7 @@ export const TransactionProvider = ({ children }) => {
          uploadPost, postData, handlePostChange, createPinLoading, // Upload post for './CreatePin.jsx'
          allPost, fetchPost, postExist, // Fetch post for './Feed.jsx'
          fetchOnePost, pinDetailLoading, tipsAuthor, // Fetch specific post, tip author funct. for './PinDetail.jsx'
-         fetchAuthorPosts // for './UserProfile.jsx'
+         fetchAuthorPosts, fetchUserInfo, subscribeUser // for './UserProfile.jsx'
          }}>
             {children}
         </TransactionContext.Provider>

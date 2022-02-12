@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AiOutlineLogout } from 'react-icons/ai';
+import { FiUserPlus } from "react-icons/fi";
+import { FiUserX } from "react-icons/fi";
 import { useParams, useNavigate } from 'react-router-dom';
 import Identicon from 'identicon.js';
 
@@ -8,21 +9,40 @@ import Spinner from './Spinner';
 import { TransactionContext } from '../context/TransactionContext';
 
 export const UserProfile = () => {
-    const { fetchAuthorPosts } = useContext(TransactionContext);
+    const { currentAccount, fetchAuthorPosts, fetchUserInfo, subscribeUser } = useContext(TransactionContext);
     const [user, setUser] = useState(null);
     const [pins, setPins] = useState(null);
+    const [followerNum, setFollowerNum] = useState(0);
+    const [subscribeNum, setSubscribeNum] = useState(0);
 
     const navigate = useNavigate();
     const { userAddress } = useParams(); 
 
+    // Fetching User's Posts
     const fetch = async (userAddress) => {
         const lowerUserAddress = userAddress.toLowerCase();
         const posts = await fetchAuthorPosts(lowerUserAddress);
         setPins(posts);
     }
 
+    // Fetching User's followers and subscribers
+    const fetchUser = async (userAddress) => {
+        const lowerUserAddress = userAddress.toLowerCase();
+        const userInfo = await fetchUserInfo(lowerUserAddress);
+        setFollowerNum(userInfo.followers.length);
+        setSubscribeNum(userInfo.subscribes.length);
+    }
+
+    const handleSubscribe = (e) => {
+        e.preventDefault();
+        console.log(currentAccount);
+        subscribeUser(userAddress, currentAccount);
+    }
+
     useEffect(() => {
         fetch(userAddress);
+        fetchUser(userAddress);
+
     }, [userAddress]);
 
     if(!pins) return <Spinner message="Loading Profile" />
@@ -45,8 +65,28 @@ export const UserProfile = () => {
                         <h1 className="text-xl text-center mt-3">
                             {userAddress}
                         </h1>
-                        <div className="absolute top-0 z-1 right-0 p-2">
-                            {/* Google Logout */}
+                        <div className="flex justify-between bg-gray p-4 rounded-lg shadow-lg">
+                            <div className="flex flex-col text-center m-2">
+                                <span className="font-bold text-xl">{followerNum}</span>
+                                <span className="text-base text-blue-600">Followers</span>
+                            </div>
+                            <div className="flex flex-col text-center m-2">
+                                <span className="font-bold text-xl">{subscribeNum}</span>
+                                <span className="text-base text-blue-600">Subscribes</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            {(currentAccount !== userAddress.toLowerCase()) && (
+                                <button
+                                    type="button"
+                                    className="flex bg-blue-500 text-white font-bold mt-3 p-2 rounded-full w-36 outline-none item-center justify-center"
+                                    onClick={handleSubscribe}
+                                >
+                                    <FiUserPlus className="m-1 w-5 h-5 opacity-50" />
+                                    Subscribe
+                                </button>
+                            )}
                         </div>
                     </div>
                     {pins?.length !== 0 ? (
