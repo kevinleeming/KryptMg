@@ -25,7 +25,7 @@ export const Navbar = ({ searchTerm, setSearchTerm, user }) => {
             </div>
             <div className="flex gap-3">
                 <Link to={`/user-profile/${currentAccount}`} className="hidden md:block">
-                    <img src={user.profilePic} alt="user-img" className="w-10 h-10 rounded-full"/>
+                    <img src={user.profilePic} alt="" className="w-10 h-10 rounded-full"/>
                 </Link>
                 <Link to="/create-pin" className="bg-stone-600/60 hover:bg-stone-600/80 text-white rounded-2xl w-24 h-9 md:w-40 md:h-10 flex justify-center items-center">
                     <IoMdAdd />

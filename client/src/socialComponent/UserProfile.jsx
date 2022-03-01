@@ -9,11 +9,12 @@ import Spinner from './Spinner';
 import { TransactionContext } from '../context/TransactionContext';
 
 export const UserProfile = () => {
-    const { currentAccount, fetchAuthorPosts, fetchUserInfo, subscribeUser } = useContext(TransactionContext);
-    const [user, setUser] = useState(null);
+    const { checkIfWalletIsConnected, currentAccount, fetchAuthorPosts, fetchUserInfo, subscribeUser, unsubscribeUser } = useContext(TransactionContext);
     const [pins, setPins] = useState(null);
     const [followerNum, setFollowerNum] = useState(0);
     const [subscribeNum, setSubscribeNum] = useState(0);
+    const [beenSubscribe, setBeenSubscribe] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
     const { userAddress } = useParams(); 
@@ -29,14 +30,39 @@ export const UserProfile = () => {
     const fetchUser = async (userAddress) => {
         const lowerUserAddress = userAddress.toLowerCase();
         const userInfo = await fetchUserInfo(lowerUserAddress);
-        setFollowerNum(userInfo.followers.length);
-        setSubscribeNum(userInfo.subscribes.length);
+        setFollowerNum(userInfo[0].followers.length);
+        setSubscribeNum(userInfo[0].subscribes.length);
+
+        const followers = userInfo[0].followers;
+        const account = await checkIfWalletIsConnected();
+        for(let i = 0; i < followers.length; i++){
+            if(followers[i].address.toLowerCase() == account){
+                setBeenSubscribe(true);
+                break;
+            }
+            else { setBeenSubscribe(false);}
+        }
     }
 
-    const handleSubscribe = (e) => {
+    const handleSubscribe = async (e) => {
         e.preventDefault();
-        console.log(currentAccount);
-        subscribeUser(userAddress, currentAccount);
+        const lowerUserAddress = userAddress.toLowerCase();
+        const lowerCurrentAccount = currentAccount.toLowerCase();
+        setLoading(true);
+        await subscribeUser(lowerUserAddress, lowerCurrentAccount);
+        setLoading(false);
+        fetchUser(userAddress);
+    }
+
+    const handleUnsubscribe = async (e) => {
+        e.preventDefault();
+        const lowerUserAddress = userAddress.toLowerCase();
+        const lowerCurrentAccount = currentAccount.toLowerCase();
+        setLoading(true);
+        await unsubscribeUser(lowerUserAddress, lowerCurrentAccount);
+        setLoading(false);
+        setBeenSubscribe(false);
+        fetchUser(userAddress);
     }
 
     useEffect(() => {
@@ -46,6 +72,7 @@ export const UserProfile = () => {
     }, [userAddress]);
 
     if(!pins) return <Spinner message="Loading Profile" />
+    if(loading) return <Spinner message="Loading" />
 
     return (
         <div className="relative pb-2 h-full justify-center items-center">
@@ -78,14 +105,26 @@ export const UserProfile = () => {
                         
                         <div>
                             {(currentAccount !== userAddress.toLowerCase()) && (
-                                <button
-                                    type="button"
-                                    className="flex bg-blue-500 text-white font-bold mt-3 p-2 rounded-full w-36 outline-none item-center justify-center"
-                                    onClick={handleSubscribe}
-                                >
-                                    <FiUserPlus className="m-1 w-5 h-5 opacity-50" />
-                                    Subscribe
-                                </button>
+                                (beenSubscribe) ? (
+                                    <button
+                                        type="button"
+                                        className="flex bg-red-500 text-white font-bold mt-3 p-2 rounded-full w-36 outline-none item-center justify-center"
+                                        onClick={handleUnsubscribe}
+                                    >
+                                        <FiUserPlus className="m-1 w-5 h-5 opacity-50" />
+                                        Unsubscribe
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="flex bg-blue-500 text-white font-bold mt-3 p-2 rounded-full w-36 outline-none item-center justify-center"
+                                        onClick={handleSubscribe}
+                                    >
+                                        <FiUserPlus className="m-1 w-5 h-5 opacity-50" />
+                                        Subscribe
+                                    </button>
+                                )
+                                
                             )}
                         </div>
                     </div>

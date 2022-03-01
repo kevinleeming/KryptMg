@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
 import { HiMenu } from 'react-icons/hi';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import { Link, Routes, Route } from 'react-router-dom';
+import { TransactionContext } from '../context/TransactionContext';
 
 import { Sidebar, UserProfile, Pins } from '../socialComponent';
 
 const Home = () => {
+    const { currentAccount } = useContext(TransactionContext);
     const [toggleSidebar, setToggleSidebar] = useState(false);
     const [user, setUser] = useState({name: localStorage.getItem("name") , email: localStorage.getItem("email") , profilePic: localStorage.getItem("profilePic")});
     const scrollRef = useRef(null);
@@ -22,7 +24,7 @@ const Home = () => {
             <div className="flex md:hidden flex-row"> {/* Mobile: */}
                 <div className="p-2 w-full flex flex-row justify-between items-center shadow-md">
                     <HiMenu fontSize={40} className="cursor-pointer" onClick={() => setToggleSidebar(true)} />
-                    <Link to={`user-profile/${user?.name}`}>
+                    <Link to={`user-profile/${currentAccount}`}>
                         <img src={user?.profilePic} alt="" className="w-10 h-10 rounded-full" />
                     </Link>
                 </div>
