@@ -10,14 +10,17 @@ import { GrMoney } from 'react-icons/gr';
 import Spinner from './Spinner';
 import { TransactionContext } from '../context/TransactionContext';
 import { shortenAddress } from '../utils/shortenAddress';
+import Modal from './Modal';
 
 const PinDetail = ({ user }) => {
-    const { fetchOnePost, pinDetailLoading, tipsAuthor, fetchPostThumbs, handleThumbsup, handleUnthumbsup } = useContext(TransactionContext);
+    const { fetchOnePost, pinDetailLoading, tipsAuthor, fetchPostThumbs, handleThumbsup, handleUnthumbsup, AdLogoUpload } = useContext(TransactionContext);
     const [pinDetail, setPinDetail] = useState(null);
     const [eth, setEth] = useState("");
     const [thumbsupNum, setThumbsupNum] = useState(0);
     const [haveBeenThumbsup, setHaveBeenThumbsup] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+    const [adUrl, setAdUrl] = useState("");
     const { pinId } = useParams();
 
     const fetch = async (pinId) => {
@@ -36,11 +39,16 @@ const PinDetail = ({ user }) => {
         setEth(e.target.value);
     }
 
-    const handleSubmit = (e) => {
+    const handleUrlChange = (e) => {
+        setAdUrl(e.target.value);
+    }
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const author = pinDetail.author;
         const postId = Number(pinDetail.id._hex);
         if(!author || eth <= 0 || postId === 0) return;
+        setIsOpen(false);
         tipsAuthor(eth, author, postId);
 
         var template = {
@@ -94,28 +102,27 @@ const PinDetail = ({ user }) => {
                     <video src={pinDetail.hash} controls autoPlay className="rounded-t-3xl rounded-b-lg" />
                 }
                 <div className="absolute bottom-0 left-0 flex flex-row p-4">
-                    {haveBeenThumbsup ? (
-                        <button
-                            type="button"
-                            onClick={handleUnthumbsupEvent}
-                        >
-                            <div className="bg-red-500/80 rounded-full p-1 item-center justify-center">
-                                <AiOutlineHeart className="w-12 h-12 opacity-80" />
-                            </div>
-                        </button>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={handleThumbsupEvent}
-                        >
-                            <div className="bg-transparent rounded-full p-1 item-center justify-center">
-                                <AiOutlineHeart className="w-12 h-12 opacity-80" />
-                            </div>
-                        </button>
-                    )}
-                    
-                    <div className="bg-gray-100/50 rounded-full ml-2 item-center justify-center">
-                        <p className="ml-2 p-1 text-black text-2xl opacity-70">{thumbsupNum}</p>
+                    <div className="bg-red-100/50 rounded-lg ml-2 item-center justify-center flex flex-row">
+                        {haveBeenThumbsup ? (
+                            <button
+                                type="button"
+                                onClick={handleUnthumbsupEvent}
+                            >
+                                <div className="bg-red-500/80 rounded-full p-1 item-center justify-center">
+                                    <AiOutlineHeart className="w-12 h-12 opacity-80" />
+                                </div>
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={handleThumbsupEvent}
+                            >
+                                <div className="bg-transparent rounded-full p-1 item-center justify-center">
+                                    <AiOutlineHeart className="w-12 h-12 opacity-80" />
+                                </div>
+                            </button>
+                        )}
+                        <p className="m-2 p-1 text-black text-2xl opacity-70">{thumbsupNum}</p>
                     </div>
                 </div>
                 <div className="absolute bottom-0 right-0 p-4">
@@ -170,22 +177,14 @@ const PinDetail = ({ user }) => {
                     </div>
                 </Link>
                 
-                <h2 className="mt-10 text-xl font-bold">Tips Author</h2>
-                <input 
-                    placeholder="Amount (ETH)"
-                    type="number"
-                    step="0.0001"
-                    value={eth}
-                    onChange={handleChange}
-                    className="my-2 rounded-sm p-2 border-[1px] border-gray-400 bg-gray text-sm focus:outline-none"
-                />
                 <button
                     type="button"
-                    onClick={handleSubmit}
-                    className="ml-3 border-[1px] p-2 border-[#c2d0f2] hover:bg-[#c2d0f2] rounded-lg cursor-pointer"
+                    onClick={() => setIsOpen(true)}
+                    className="m-3 border-[2px] p-2 border-[#c2d0f2] hover:bg-[#c2d0f2] rounded-xl cursor-pointer"
                 >
-                    Send
+                    <p className="text-lg subpixel-antialiased font-sans">Donate Author</p>
                 </button>
+                <Modal open={isOpen} onClose={() => setIsOpen(false)} normalDonate={handleSubmit} handleChange={handleChange} eth={eth} handleUrlChange={handleUrlChange} adUrl={adUrl} setIsOpen={setIsOpen} AdLogoUpload={AdLogoUpload} />
             </div>
         </div>
     )

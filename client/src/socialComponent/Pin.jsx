@@ -70,7 +70,6 @@ const Pin = ({ pin: { isImage, hash, id, author, category, tipAmount, authorGmai
                 <div className="flex">
                     <img
                         src={authorPic}
-                        alt="user-profile"
                         className="w-7 h-7 rounded-full object-cover"
                     />
                     <p className="font-semibold ml-1 capitalize">{authorGmailName}</p>

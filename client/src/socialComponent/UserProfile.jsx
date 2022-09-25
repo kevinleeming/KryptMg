@@ -7,6 +7,7 @@ import Identicon from 'identicon.js';
 import MasonryLayout from './MasonryLayout';
 import Spinner from './Spinner';
 import { TransactionContext } from '../context/TransactionContext';
+import NFT from "../../images/NFT.png";
 
 export const UserProfile = () => {
     const { checkIfWalletIsConnected, currentAccount, fetchAuthorPosts, fetchUserInfo, subscribeUser, unsubscribeUser } = useContext(TransactionContext);
@@ -138,6 +139,9 @@ export const UserProfile = () => {
                         </div>
                     )}
                     
+                    <div className="flex flex-col justify-start items-center">
+                        <img src={NFT} alt="Advertisement" className="cursor-pointer" />
+                    </div>
                 </div>
             </div>
         </div>

@@ -140,7 +140,7 @@ export const TransactionProvider = ({ children }) => {
 
             // 2. create post doc on sanity db
             const postDoc = {
-                _id: currentAccount + title + category,
+                _id: currentAccount + title.replace(/ /g, '') + category,
                 _type: 'post',
                 thumbsup: 0,
                 author: currentAccount
@@ -170,7 +170,7 @@ export const TransactionProvider = ({ children }) => {
             setPostExist(false);
             const transactionContract = getEthereumContract();
             const postCount = await transactionContract.postCount();
-            for(var i = 1; i <= postCount; i++){
+            for(var i = 2; i <= postCount; i++){
                 const p = await transactionContract.post(i);
                 if(categoryName == 'all'){
                     allPost.push(p);
@@ -303,7 +303,7 @@ export const TransactionProvider = ({ children }) => {
     // Fetching post's thumbsup number and whether this user already thumbsup or not ?
     const fetchPostThumbs = async (author, title, category) => {
         try {
-            const queryId = author.toLowerCase() + title + category;
+            const queryId = author.toLowerCase() + title.replace(/ /g, '') + category;
             const query = `*[_type == "post" && _id == '${queryId}']`;
             const thumbsupQuery = await sdbClient.fetch(query);
             const info = {
@@ -326,7 +326,7 @@ export const TransactionProvider = ({ children }) => {
 
     const handleThumbsup = async (author, title, category, account = currentAccount) => {
         try {
-            const patchId = author.toLowerCase() + title + category;
+            const patchId = author.toLowerCase() + title.replace(/ /g, '') + category;
             await sdbClient.patch(patchId)
                 .setIfMissing({thumbsup: 0})
                 .inc({thumbsup: 1})
@@ -343,7 +343,7 @@ export const TransactionProvider = ({ children }) => {
     
     const handleUnthumbsup = async (author, title, category, account = currentAccount) => {
         try {
-            const patchId = author.toLowerCase() + title + category;
+            const patchId = author.toLowerCase() + title.replace(/ /g, '') + category;
             await sdbClient.patch(patchId)
                 .setIfMissing({thumbsup: 0})
                 .dec({thumbsup: 1})
@@ -356,6 +356,26 @@ export const TransactionProvider = ({ children }) => {
         }
     }
 
+    const AdLogoUpload = async (document, adUrl, deployNum, setIsOpen) => {
+        console.log(document?._id);
+        const doc = {
+            _type: 'advertise',
+            adLogo: {
+                _type: 'image',
+                asset: {
+                    _type: 'reference',
+                    _ref: document?._id
+                }
+            },
+            adUrl,
+            deployNum 
+        }
+        sdbClient.create(doc)
+            .then(() => {
+                setIsOpen(false);
+            })
+    }
+
     useEffect(() => {
         checkIfWalletIsConnected();
     }, []);
@@ -364,7 +384,7 @@ export const TransactionProvider = ({ children }) => {
         <TransactionContext.Provider value={{ checkIfWalletIsConnected, connectWallet, currentAccount, isLoading, formData, sendTransaction, handleChange,
          uploadPost, postData, handlePostChange, createPinLoading, // Upload post for './CreatePin.jsx'
          allPost, fetchPost, postExist, // Fetch post for './Feed.jsx'
-         fetchOnePost, pinDetailLoading, tipsAuthor, fetchPostThumbs, handleThumbsup, handleUnthumbsup,// Fetch specific post, tip author funct. for './PinDetail.jsx'
+         fetchOnePost, pinDetailLoading, tipsAuthor, fetchPostThumbs, handleThumbsup, handleUnthumbsup, AdLogoUpload,// Fetch specific post, tip author funct. for './PinDetail.jsx'
          fetchAuthorPosts, fetchUserInfo, subscribeUser, unsubscribeUser // for './UserProfile.jsx'
          }}>
             {children}
